@@ -1,25 +1,71 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useCallback, useContext } from 'react';
+import { HashRouter as Router, Switch, Route } from "react-router-dom";
 
-function App() {
+import { makeStyles } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+
+import MenuSuperior from 'navegacion/MenuSuperior';
+import DrawerLateral from 'navegacion/DrawerLateral';
+import Pantalla from 'pantallas/Pantalla';
+
+import { ContextoAplicacion } from 'contexto';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+  },
+  content: {
+    flexGrow: 1,
+    padding: 0,
+    marginTop: theme.spacing(10),
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    })
+  }
+}));
+
+export default function App() {
+
+  const classes = useStyles();
+  const [drawerOpen, _setDrawerOpen] = React.useState(false);
+
+  const { jwt } = useContext(ContextoAplicacion);
+
+
+  const handleDrawerSwitch = useCallback((flag) => {
+    if (flag === undefined)
+      _setDrawerOpen(!drawerOpen);
+    else
+      _setDrawerOpen(flag ? true : false);
+  }, [drawerOpen, _setDrawerOpen]);
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className={classes.root}>
+
+        <CssBaseline />
+
+        <MenuSuperior onMenuClicked={handleDrawerSwitch} />
+        <DrawerLateral open={drawerOpen} onClose={() => handleDrawerSwitch(false)} onOpen={() => handleDrawerSwitch(true)} />
+
+
+        <main className={classes.content}>
+          {!jwt ? <Pantalla.Login /> :
+
+            <Switch>
+              <Route path="/usuario" render={(props) => <Pantalla.Usuario {...props} />} />
+              <Route path="/" render={(props) => <Pantalla.Principal {...props} />} />
+            </Switch>
+
+          }
+
+
+        </main>
+
+
+      </div>
+    </Router>
   );
 }
-
-export default App;
