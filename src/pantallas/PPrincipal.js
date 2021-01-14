@@ -1,15 +1,13 @@
-import { Container, Paper, Typography } from "@material-ui/core";
+import { Container } from "@material-ui/core";
+import TituloPantalla from "navegacion/TituloPantalla";
 
 
 export default function PantallaPrincipal() {
 
 	return (
 		<Container fixed maxWidth="xl">
-			<Paper>
-				<Typography variant="h1" component="h2" gutterBottom>
-					El Hermano Mayor vela por ti
-				</Typography>
-			</Paper>
+			<TituloPantalla titulo="Panel principal" />
+
 		</Container>
 	)
 

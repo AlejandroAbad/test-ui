@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -10,12 +10,16 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import ContextoAplicacion from 'contexto';
-import { Divider, ListItemIcon } from '@material-ui/core';
+import { Badge, Box, Divider, ListItemIcon, Snackbar } from '@material-ui/core';
+import K from 'K';
 
 
 import AccountBoxRoundedIcon from '@material-ui/icons/AccountBoxRounded';
 import InfoRoundedIcon from '@material-ui/icons/InfoRounded';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
+import { Alert } from '@material-ui/lab';
+import FediCommons from 'common/FediCommons';
+import { Close } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
 	menuButton: {
@@ -35,10 +39,18 @@ const useStyles = makeStyles((theme) => ({
 export default function MenuSuperior({ onMenuClicked, ...props }) {
 
 	const classes = useStyles();
-	const { jwt, setJwt } = useContext(ContextoAplicacion);
+	const { jwt, tiempoRestanteToken, setJwt } = useContext(ContextoAplicacion);
 
 
 	const [anchorEl, setAnchorEl] = useState(null);
+	const [alertaCaducado, setAlertaCaducado] = useState(false);
+
+	useEffect(() => {
+		if (tiempoRestanteToken === 0) {
+			setAlertaCaducado(true);
+		}
+	}, [tiempoRestanteToken, setAlertaCaducado])
+
 	const open = Boolean(anchorEl);
 
 
@@ -49,7 +61,6 @@ export default function MenuSuperior({ onMenuClicked, ...props }) {
 	const cerrarMenuUsuario = () => {
 		setAnchorEl(null);
 	};
-
 
 	async function ejecutarLogout() {
 		cerrarMenuUsuario();
@@ -71,6 +82,17 @@ export default function MenuSuperior({ onMenuClicked, ...props }) {
 				</Typography>
 
 
+				<Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'center', }}
+					open={alertaCaducado}
+					message="Sesión caducada."
+					onClose={() => setTimeout(() => setAlertaCaducado(false), 4000)}
+					action={
+						<IconButton size="small" aria-label="close" color="inherit" onClick={() => { setAlertaCaducado(false) }}>
+							<Close fontSize="small" />
+						</IconButton>
+					}
+				/>
+
 
 				{jwt && (
 					<div>
@@ -81,25 +103,20 @@ export default function MenuSuperior({ onMenuClicked, ...props }) {
 							onClick={abrirMenuUsuario}
 							color="inherit"
 						>
-							<AccountCircle />
+							{tiempoRestanteToken < K.ALERTA_EXPIRACION_TOKEN ?
+								<Badge badgeContent='!' color="error" anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} >
+									<AccountCircle />
+								</Badge>
+								:
+								<AccountCircle />
+							}
 						</IconButton>
 
 
-						<Menu
-							id="menu-appbar"
-							anchorEl={anchorEl}
-							anchorOrigin={{
-								vertical: 'top',
-								horizontal: 'right',
-							}}
-							keepMounted
-							transformOrigin={{
-								vertical: 'top',
-								horizontal: 'right',
-							}}
-							open={open}
-							onClose={cerrarMenuUsuario}
-						>
+						<Menu id="menu-appbar" anchorEl={anchorEl} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted
+							transformOrigin={{ vertical: 'top', horizontal: 'right', }} open={open} onClose={cerrarMenuUsuario}	>
+
+
 
 							<MenuItem component={Link} to='/usuario' onClick={cerrarMenuUsuario} >
 								<ListItemIcon>
@@ -119,6 +136,17 @@ export default function MenuSuperior({ onMenuClicked, ...props }) {
 								</ListItemIcon>
 								Cerrar sesión
 							</MenuItem>
+
+							<div>
+								<Divider />
+								<Box marginTop={2} marginBottom={1}>
+									<Alert severity={tiempoRestanteToken < K.ALERTA_EXPIRACION_TOKEN ? "warning" : "info"} >
+										La sesión {FediCommons.tiempoParaExpiracionToken(tiempoRestanteToken)}.
+									</Alert>
+								</Box>
+							</div>
+
+
 						</Menu>
 					</div>
 				)}

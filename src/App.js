@@ -50,20 +50,18 @@ export default function App() {
         <MenuSuperior onMenuClicked={handleDrawerSwitch} />
         <DrawerLateral open={drawerOpen} onClose={() => handleDrawerSwitch(false)} onOpen={() => handleDrawerSwitch(true)} />
 
-
         <main className={classes.content}>
-          {!jwt ? <Pantalla.Login /> :
+            {!jwt ? <Pantalla.Login /> :
 
-            <Switch>
-              <Route path="/usuario" render={(props) => <Pantalla.Usuario {...props} />} />
-              <Route path="/" render={(props) => <Pantalla.Principal {...props} />} />
-            </Switch>
+              <Switch>
+                <Route path="/usuario" render={(props) => <Pantalla.Usuario {...props} />} />
+                <Route path="/utilidades/visorTramasFedicom2" render={(props) => <Pantalla.VisorTramasFedicom2 {...props} />} />
+                <Route path="/" render={(props) => <Pantalla.Principal {...props} />} />
+              </Switch>
 
-          }
+            }
 
-
-        </main>
-
+          </main>
 
       </div>
     </Router>

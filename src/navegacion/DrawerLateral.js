@@ -1,5 +1,5 @@
 import { Avatar, Box, Chip, Collapse, Icon, IconButton, List, ListItem, ListItemIcon, ListItemText, ListSubheader, makeStyles, SwipeableDrawer } from "@material-ui/core";
-import { AccountBoxRounded, ChevronLeft, ExpandLess, ExpandMore, } from "@material-ui/icons";
+import { Assessment, Business, CallSplit, Input, ChevronLeft, Dashboard, ExpandLess, ExpandMore, Filter2, Looks3, MoveToInbox, NearMe, Speed, Storage, Security, Translate, FindInPage } from "@material-ui/icons";
 import ContextoAplicacion from "contexto";
 import { useCallback, useContext, useState } from "react";
 import { Link } from "react-router-dom";
@@ -48,26 +48,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-function BotonMenu({ texto, icono, link, onClick, menu, esTitulo }) {
+function BotonMenu({ texto, icono, link, onClick, subMenu, esTitulo, cerrarDrawer }) {
 
 	const [menuAbierto, setMenuAbierto] = useState(false);
 	const cambiaEstadoMenu = useCallback(() => {
-		if (!menu) return;
+		if (!subMenu) return;
 		setMenuAbierto(!menuAbierto);
-	}, [menu, menuAbierto, setMenuAbierto])
+	}, [subMenu, menuAbierto, setMenuAbierto])
 
 	if (esTitulo) {
 		return <ListSubheader disableSticky>{texto}</ListSubheader>
 	}
 
 	let propiedades = {};
-	if (link && !menu) {
+	if (link && !subMenu) {
 		propiedades.component = Link;
 		propiedades.to = link;
 	}
 
 	let elementoMenu = null;
-	if (menu) {
+	if (subMenu) {
 		if (onClick) {
 			propiedades.onClick = () => {
 				cambiaEstadoMenu();
@@ -80,13 +80,22 @@ function BotonMenu({ texto, icono, link, onClick, menu, esTitulo }) {
 
 		elementoMenu = <Collapse in={menuAbierto} timeout="auto" unmountOnExit>
 			<Box paddingLeft={3}>
-				{menu.map((m, i) => <BotonMenu key={i} {...m} />)}
+				{subMenu.map((m, i) => <BotonMenu key={i} cerrarDrawer={cerrarDrawer} {...m} />)}
 			</Box>
 		</Collapse>
 
 	} else {
-		if (onClick)
-			propiedades.onClick = onClick;
+		if (onClick) {
+			propiedades.onClick = () => {
+				onClick()
+				cerrarDrawer();
+			}
+		} else {
+			propiedades.onClick = () => {
+				cerrarDrawer();
+			}
+		}
+		
 	}
 
 	return (
@@ -96,7 +105,7 @@ function BotonMenu({ texto, icono, link, onClick, menu, esTitulo }) {
 					<Icon component={icono} fontSize="small" />
 				</ListItemIcon>
 				<ListItemText primary={texto} />
-				{menu && (menuAbierto ? <ExpandLess /> : <ExpandMore />)}
+				{subMenu && (menuAbierto ? <ExpandLess /> : <ExpandMore />)}
 			</ListItem>
 			{ elementoMenu}
 		</Box>
@@ -107,31 +116,31 @@ function BotonMenu({ texto, icono, link, onClick, menu, esTitulo }) {
 const BOTONES = [
 
 
-	{ texto: "Dashboard", icono: AccountBoxRounded, link: '/' },
+	{ texto: "Dashboard", icono: Dashboard, link: '/' },
 
 
 	{ texto: "Pedidos", esTitulo: true },
 	{
-		texto: "Búsqueda", icono: AccountBoxRounded, menu: [
-			{ texto: "Proyman / Fedicom 2", icono: AccountBoxRounded, link: '/' },
-			{ texto: "Fedicom 3", icono: AccountBoxRounded, link: '/' },
+		texto: "Transmisiones", icono: MoveToInbox, subMenu: [
+			{ texto: "Proyman / Fedicom 2", icono: Filter2, link: '/' },
+			{ texto: "Fedicom 3", icono: Looks3, link: '/' },
 		]
 	},
 	{
-		texto: "Informes", icono: AccountBoxRounded, menu: [
-			{ texto: "Pedidos por almacén", icono: AccountBoxRounded, link: '/' },
-			{ texto: "Pedidos por servidor SAP", icono: AccountBoxRounded, link: '/' },
+		texto: "Informes", icono: Assessment, subMenu: [
+			{ texto: "Pedidos por almacén", icono: Business, link: '/' },
+			{ texto: "Pedidos por servidor SAP", icono: Storage, link: '/' },
 		]
 	},
 
 
 	{ texto: "Fedicom3", esTitulo: true },
-	{ texto: "Base de datos", icono: AccountBoxRounded, link: '/' },
-	{ texto: "Procesos", icono: AccountBoxRounded, link: '/' },
+	{ texto: "Base de datos", icono: Storage, link: '/' },
+	{ texto: "Procesos", icono: Speed, link: '/' },
 	{
-		texto: "Balanceo de carga", icono: AccountBoxRounded, menu: [
-			{ texto: "Entrada pedidos", icono: AccountBoxRounded, link: '/' },
-			{ texto: "Servidores SAP", icono: AccountBoxRounded, link: '/' },
+		texto: "Balanceo de carga", icono: CallSplit, subMenu: [
+			{ texto: "Entrada pedidos", icono: Input, link: '/' },
+			{ texto: "Servidores SAP", icono: Storage, link: '/' },
 		]
 	},
 
@@ -139,15 +148,15 @@ const BOTONES = [
 	{ texto: "Herramientas", esTitulo: true },
 
 	{
-		texto: "Simuladores", icono: AccountBoxRounded, menu: [
-			{ texto: "Pedidos", icono: AccountBoxRounded, link: '/' },
-			{ texto: "Devoluciones", icono: AccountBoxRounded, link: '/' },
-			{ texto: "Logística", icono: AccountBoxRounded, link: '/' },
-			{ texto: "Consultas", icono: AccountBoxRounded, link: '/' },
-			{ texto: "Test de stress", icono: AccountBoxRounded, link: '/' },
+		texto: "Simuladores Fedicom3", icono: NearMe, subMenu: [
+			{ texto: "Pedidos", icono: NearMe, link: '/' },
+			{ texto: "Devoluciones", icono: NearMe, link: '/' },
+			{ texto: "Logística", icono: NearMe, link: '/' },
+			{ texto: "Consultas", icono: FindInPage, link: '/' },
+			{ texto: "Test de stress", icono: Security, link: '/' },
 		]
 	},
-	{ texto: "Visor de tramas Fedicom2", icono: AccountBoxRounded, link: '/' },
+	{ texto: "Visor de tramas Fedicom2", icono: Translate, link: '/utilidades/visorTramasFedicom2' },
 
 
 ]
@@ -160,13 +169,15 @@ export default function DrawerLateral({ open, onClose, onOpen }) {
 
 	if (!usuario) return null;
 
-	return <SwipeableDrawer
-		className={classes.drawer}
-		anchor="left"
-		open={open}
-		onClose={onClose}
-		onOpen={onOpen}
-		classes={{ paper: classes.drawerPaper, }} >
+	return <SwipeableDrawer 
+		className={classes.drawer} 
+		anchor="left" 
+		open={open} 
+		onClose={onClose} 
+		onOpen={onOpen} 
+		classes={{ paper: classes.drawerPaper, }} 
+
+	>
 		<div className={classes.drawerHeader}>
 			<IconButton onClick={onClose}>
 				<ChevronLeft />
@@ -178,9 +189,7 @@ export default function DrawerLateral({ open, onClose, onOpen }) {
 				{usuario.anonimo ?
 					<Avatar className={classes.avatar} color="primary"><VisibilityRoundedIcon fontSize="large" /></Avatar>
 					:
-					<Avatar className={classes.avatar} color="primary">
-						{usuario.sub.substring(0, 1)}
-					</Avatar>
+					<Avatar className={classes.avatar} color="primary">{usuario.sub.substring(0, 1)}</Avatar>
 				}
 			</Box>
 			<Box display="flex" justifyContent="center">
@@ -188,9 +197,9 @@ export default function DrawerLateral({ open, onClose, onOpen }) {
 			</Box>
 		</div>
 
-		<List>
+		<List >
 			{
-				BOTONES.map((boton, i) => <BotonMenu key={i} {...boton} />)
+				BOTONES.map((boton, i) => <BotonMenu key={i} cerrarDrawer={onClose} {...boton}  />)
 			}
 		</List>
 

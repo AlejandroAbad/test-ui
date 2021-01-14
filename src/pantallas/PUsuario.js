@@ -1,7 +1,9 @@
 import { Avatar, Backdrop, Box, Card, CardContent, Chip, CircularProgress, Container, makeStyles, Typography } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
+import FediCommons from "common/FediCommons";
 import ContextoAplicacion from "contexto";
 import moment from "moment";
+import TituloPantalla from "navegacion/TituloPantalla";
 import { useContext } from "react";
 import ReactJson from "react-json-view";
 
@@ -27,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 		margin: theme.spacing(2, 0)
 	},
 	titulo: {
-		fontSize: 14,
+		fontSize: 12,
 	},
 	valorFecha: {
 		paddingLeft: theme.spacing(2)
@@ -55,7 +57,9 @@ function CartaDatosUsuario() {
 	}
 
 	if (usuario.anonimo) {
-		return (<Card className={classes.carta}>
+		return (
+		
+		<Card className={classes.carta}>
 			<CardContent>
 				<Typography className={classes.titulo} color="textSecondary" gutterBottom>
 					Datos del usuario
@@ -73,7 +77,7 @@ function CartaDatosUsuario() {
 	return (
 		<Card className={classes.carta}>
 			<CardContent>
-				<Typography className={classes.titulo} color="textSecondary" gutterBottom>
+				<Typography variant="overline" className={classes.titulo} color="textSecondary" gutterBottom>
 					Datos del usuario
         			</Typography>
 				<Typography variant="h5" component="h2">
@@ -84,7 +88,7 @@ function CartaDatosUsuario() {
 				</Typography>
 
 				{(usuario.perms && usuario.perms.length > 0) &&
-					<Typography variant="body2" component="p" className={classes.permisos}>
+					<Typography variant="body2" component="span" className={classes.permisos}>
 						Permisos del usuario: <br /> {
 							usuario.perms.map((p, i) =>
 								<Chip
@@ -130,15 +134,13 @@ function CartaDatosTokenFedicom3() {
 
 	let fechaEmision = moment(usuario.iat * 1000)
 	let fechaCaducidad = moment(usuario.exp * 1000)
-	let tiempoRestante = tiempoRestanteToken >= 60 ?
-		Math.floor(tiempoRestanteToken / 60) + ' minuto' + (tiempoRestanteToken < 120 ? '' : 's') :
-		tiempoRestanteToken + ' segundo' + (tiempoRestanteToken % 60 === 1 ? '' : 's')
+	let tiempoRestante = FediCommons.tiempoParaExpiracionToken(tiempoRestanteToken);
 
 
 	return (
 		<Card className={classes.carta}>
 			<CardContent>
-				<Typography className={classes.titulo} color="textSecondary" gutterBottom>
+				<Typography variant="overline" className={classes.titulo} color="textSecondary" >
 					Datos del token
         		</Typography>
 
@@ -164,7 +166,7 @@ function CartaDatosTokenFedicom3() {
 				</Typography>
 
 				<Typography variant="caption" className={classes.valorFechaConMargenInferior} display="block" >
-					{tiempoRestanteToken !== Infinity ? <>Caduca en {tiempoRestante}</> : <><CircularProgress size={14} /> Calculando ...</>}
+					{tiempoRestanteToken !== Infinity ? <>La sesión {tiempoRestante}.</> : <><CircularProgress size={13} /> Calculando ...</>}
 				</Typography>
 
 
@@ -191,6 +193,8 @@ export default function PantallaUsuario() {
 
 	return (
 		<Container fixed maxWidth="xl">
+			<TituloPantalla titulo="Datos de la sesión" />
+
 			<CartaDatosUsuario />
 			<CartaDatosTokenFedicom3 />
 		</Container>

@@ -15,7 +15,8 @@ const K = {
 			meta: { ok: true, verified: true },
 			perms: []
 		}
-	}
+	},
+	ALERTA_EXPIRACION_TOKEN: 5*60
 
 }
 

@@ -23,8 +23,31 @@ export const convertirErrorLlamadaFedicom = (errorFedicom, pintarCodigos) => {
 
 }
 
+
+
+export const tiempoParaExpiracionToken = (segundos) => {
+
+	if (segundos === Infinity) return 'no caduca';
+
+	let valor = segundos;
+	let unidad = ' segundo';
+
+
+	if (valor >= 3600) {
+		valor = Math.floor(valor / 3600);
+		unidad = ' hora';
+	} else if (valor >= 60) {
+		valor = Math.floor(valor / 60);
+		unidad = ' minuto';
+	}
+
+	return 'caduca en ' + valor + unidad +  (valor === 1 ? '' : 's');
+
+}
+
 const FediCommons = {
-	convertirErrorLlamadaFedicom
+	convertirErrorLlamadaFedicom,
+	tiempoParaExpiracionToken
 }
 
 export default FediCommons;
