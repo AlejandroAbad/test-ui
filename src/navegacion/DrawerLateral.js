@@ -1,8 +1,9 @@
-import { Avatar, Box, Chip, Collapse, Icon, IconButton, List, ListItem, ListItemIcon, ListItemText, ListSubheader, makeStyles, SwipeableDrawer, Typography, useTheme } from "@material-ui/core";
+import { Avatar, Box, Chip, Collapse, Icon, IconButton, List, ListItem, ListItemIcon, ListItemText, ListSubheader, makeStyles, SwipeableDrawer } from "@material-ui/core";
 import { AccountBoxRounded, ChevronLeft, ExpandLess, ExpandMore, } from "@material-ui/icons";
 import ContextoAplicacion from "contexto";
 import { useCallback, useContext, useState } from "react";
 import { Link } from "react-router-dom";
+import VisibilityRoundedIcon from '@material-ui/icons/VisibilityRounded';
 
 const drawerWidth = 340;
 
@@ -79,7 +80,7 @@ function BotonMenu({ texto, icono, link, onClick, menu, esTitulo }) {
 
 		elementoMenu = <Collapse in={menuAbierto} timeout="auto" unmountOnExit>
 			<Box paddingLeft={3}>
-				{menu.map(m => <BotonMenu {...m} />)}
+				{menu.map((m, i) => <BotonMenu key={i} {...m} />)}
 			</Box>
 		</Collapse>
 
@@ -174,9 +175,13 @@ export default function DrawerLateral({ open, onClose, onOpen }) {
 
 		<div className={classes.drawerTitulo}>
 			<Box display="flex" justifyContent="center" width="100%">
-				<Avatar className={classes.avatar} color="primary">
-					{usuario.sub.substring(0, 1)}
-				</Avatar>
+				{usuario.anonimo ?
+					<Avatar className={classes.avatar} color="primary"><VisibilityRoundedIcon fontSize="large" /></Avatar>
+					:
+					<Avatar className={classes.avatar} color="primary">
+						{usuario.sub.substring(0, 1)}
+					</Avatar>
+				}
 			</Box>
 			<Box display="flex" justifyContent="center">
 				<Chip label={usuario.sub} className={classes.chipNombreUsuario} />
@@ -185,7 +190,7 @@ export default function DrawerLateral({ open, onClose, onOpen }) {
 
 		<List>
 			{
-				BOTONES.map((boton, j) => <BotonMenu {...boton} />)
+				BOTONES.map((boton, i) => <BotonMenu key={i} {...boton} />)
 			}
 		</List>
 
