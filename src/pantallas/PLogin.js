@@ -9,8 +9,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { Box, Collapse, IconButton } from '@material-ui/core';
 
-
-import VisibilityRoundedIcon from '@material-ui/icons/VisibilityRounded';
 import ContextoAplicacion from 'contexto';
 import BarraProgresoSuperior from '../navegacion/BarraProgresoSuperior';
 import { useApiCall } from 'hooks/useApiCall';
@@ -47,15 +45,11 @@ const useStyles = makeStyles((theme) => ({
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		marginTop: theme.spacing(1),
+		marginTop: theme.spacing(2),
 		paddingTop: theme.spacing(1),
 		borderTopStyle: 'dashed',
 		borderTop: 2,
 		borderTopColor: theme.palette.grey[300],
-		[theme.breakpoints.up('md')]: {
-			marginTop: theme.spacing(4),
-			paddingTop: theme.spacing(4)
-		}
 	},
 	submit: {
 		margin: theme.spacing(3, 0, 2),
@@ -162,20 +156,10 @@ export default function PantallaLogin() {
 
 			<Box className={classes.cajaInferior} >
 
-				<Avatar className={classes.avatarAnonimo}>
-					<VisibilityRoundedIcon />
-				</Avatar>
-				<Typography component="h1" variant="h5">
-					Sólo monitorización
-        		</Typography>
-
-
-
 				<Button
 					type="submit"
 					fullWidth
-					variant="contained"
-					color="default"
+					variant="outlined"
 					className={classes.submit}
 					onClick={inyectarTokenMonitorización}
 					disabled={resultado.cargando}

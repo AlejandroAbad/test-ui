@@ -1,7 +1,7 @@
 import PantallaUsuario from './PUsuario';
 import PantallaLogin from './PLogin';
 import PantallaPrincipal from './PPrincipal';
-import PantallaVisorTramasFedicom2 from './utilidades/PVisorTramasFedicom2';
+import PantallaVisorTramasFedicom2 from './utilidades/visorTramasFedicom2/PVisorTramasFedicom2';
 
 
 

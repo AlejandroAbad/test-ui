@@ -15,12 +15,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function TituloPantalla({titulo}) {
+export default function TituloPantalla({titulo, children}) {
 
 	const classes = useStyles();
 
 	return <Typography compoment="div" className={classes.titulo} >
-		{titulo}
+		{titulo || children}
 	</Typography>
 
 }

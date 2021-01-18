@@ -85,7 +85,7 @@ export default function MenuSuperior({ onMenuClicked, ...props }) {
 				<Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'center', }}
 					open={alertaCaducado}
 					message="Sesión caducada."
-					onClose={() => setTimeout(() => setAlertaCaducado(false), 4000)}
+					onClose={() => setTimeout(() => setAlertaCaducado(false), 2000)}
 					action={
 						<IconButton size="small" aria-label="close" color="inherit" onClick={() => { setAlertaCaducado(false) }}>
 							<Close fontSize="small" />
