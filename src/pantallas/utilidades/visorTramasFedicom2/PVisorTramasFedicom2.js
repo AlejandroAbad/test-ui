@@ -1,14 +1,14 @@
-import { Box, Button, Checkbox, Collapse, Container, FormControlLabel, ListItem, ListItemText, makeStyles, TextField } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Checkbox, Collapse, Container, Divider, Fade, FormControlLabel, ListItem, ListItemText, makeStyles, TextField, Typography } from "@material-ui/core";
 import useWindowSize from "hooks/useWindowSize";
 import TituloPantalla from "navegacion/TituloPantalla";
 import { useCallback, useRef, useState } from "react";
 import { Virtuoso } from 'react-virtuoso';
 import { useWorker } from "@koale/useworker";
-import { CloudUpload, Delete } from "@material-ui/icons";
+import { CloudUpload, DeleteForever, RotateLeft, Send } from "@material-ui/icons";
 import CircularProgressWithLabel from "common/CircularProgressWithLabel";
 import workerAnalizaTramas from "workers/workerAnalisisTramasFedicom2";
 import CajaTramaFedicom2 from "./CajaTramaFedicom2";
-import useArray from "hooks/useArray";
+import useSeleccion from "hooks/useSeleccion";
 
 
 const LABEL_CARGANDO_FICHERO = 'Cargando fichero ...';
@@ -26,40 +26,141 @@ const useStyles = makeStyles((theme) => ({
 		padding: 0
 	},
 	cabeceraTabla: {
-		borderBottom: '1px solid rgb(0,0,0,0.1)',
 		paddingBottom: '1.5em',
 		paddingLeft: '3.3em'
 	},
 	botonReiniciar: {
 		marginLeft: theme.spacing(4)
+	},
+	virtuoso: {
+		borderTop: '1px solid rgb(0,0,0,0.1)'
+	},
+	cabeceraTrama: {
+		paddingTop: theme.spacing(2),
+		paddingBottom: theme.spacing(2),
+		border: 'none',
+		paddingLeft: theme.spacing(3.5)
+	},
+	contenedorTrama: {
+		paddingTop: theme.spacing(4),
+		paddingBottom: theme.spacing(6),
+		borderTop: 'none'
+	},
+	grupoBotonMenu: {
+		paddingLeft: theme.spacing(0.8)
+	},
+	botonMenu: {
+		padding: theme.spacing(0.8, 2)
+	},
+	textoMenu: {
+		display: 'inline-block',
+		margin: theme.spacing(0, 0, 0, 2)
+
 	}
+
 }));
 
-const renderizaTrama = (index, trama, onSeleccionCambia) => {
+const renderizaTrama = (index, trama, onSeleccionCambia, classes) => {
 
 	return (
-		<CajaTramaFedicom2 trama={trama} indice={index} onSeleccionCambia={onSeleccionCambia} />
+		<CajaTramaFedicom2 trama={trama} indice={index} onSeleccionCambia={onSeleccionCambia} classes={classes} />
 	);
 }
+
+
+const CabeceraTramas = ({ seleccion, totalTramas, classes, cambiarTodaLaSeleccion, onDescartarTramas, onEliminarTramasSeleccionadas  }) => {
+
+	const cambiarSeleccion = useCallback(() => {
+		console.log(seleccion.length, totalTramas)
+		cambiarTodaLaSeleccion(seleccion.length !== totalTramas);
+	}, [cambiarTodaLaSeleccion, seleccion, totalTramas])
+
+	let intermediate = seleccion.length > 0 && seleccion.length !== totalTramas;
+	let checked = seleccion.length > 0;
+
+	let laEse = seleccion.length === 1 ? '' : 's';
+
+
+
+	return (
+		<ListItem dense className={classes.cabeceraTrama} >
+			<ListItemText>
+				<Box display="flex" >
+					<Box  >
+						<FormControlLabel
+							control={<Checkbox
+								checked={checked}
+								onClick={cambiarSeleccion}
+								indeterminate={intermediate}
+								color="primary"
+							/>}
+							label={`${seleccion.length} seleccionada${laEse}`}
+						/>
+
+					</Box>
+
+					<Fade in={checked}>
+						<Divider orientation="vertical" flexItem />
+					</Fade>
+
+					<Box flexGrow={1} mx={2} display="flex" alignItems="center" >
+						<Fade in={checked}>
+							<Box display="flex" alignItems="center">
+								<ButtonGroup className={classes.grupoBotonMenu} variant="outlined" color="default" aria-label="text primary button group" disableElevation>
+									<Button className={classes.botonMenu} startIcon={<DeleteForever />} disableElevation onClick={onEliminarTramasSeleccionadas}>
+										Eliminar de la lista
+									</Button>
+								</ButtonGroup>
+
+								<Typography variant="button" className={classes.textoMenu}>
+									Enviar pedido{laEse} a:
+								</Typography>
+								<ButtonGroup className={classes.grupoBotonMenu} variant="outlined" color="default" aria-label="text primary button group" disableElevation>
+
+									<Button className={classes.botonMenu} startIcon={<Send />} disableElevation>test</Button>
+									<Button className={classes.botonMenu} color="secondary" startIcon={<Send />} disableElevation>produccion</Button>
+								</ButtonGroup>
+							</Box>
+						</Fade>
+					</Box>
+
+
+
+					<Divider orientation="vertical" flexItem />
+					<Box  >
+						<Button color="default" variant="contained" className={classes.botonReiniciar} startIcon={<RotateLeft />} onClick={onDescartarTramas} disableElevation>
+							Reiniciar tramas
+						</Button>
+					</Box>
+				</Box>
+			</ListItemText >
+		</ListItem >
+	)
+}
+
 
 export default function PantallaVisorTramasFedicom2() {
 
 	const classes = useStyles();
 	const refTrama = useRef(null);
-	const refFileReader = useRef();
+	const virtuoso = useRef(null);
 
+	const refFileReader = useRef();
 	const windowSize = useWindowSize();
 	const [analizarTramas] = useWorker(workerAnalizaTramas);
-
 	const [estadoCarga, setEstadoCarga] = useState({ cargando: false, progreso: 0, texto: '' });
-
 	const [tramas, setTramas] = useState([]);
-	const [tramasSeleccionadas, {push: pushElementoSeleccionado, remove: eliminaElementoSeleccionado}] = useArray([]);
+	const [tramasSeleccionadas, {
+		cambiarElemento: cambiarSeleccionDeTrama,
+		setSeleccion: setTramasSeleccionadas
+	}] = useSeleccion([]);
+
 
 	const analizaTramas = useCallback(async (valorTramas) => {
 		try {
 			setEstadoCarga({ cargando: true, progreso: -1, texto: LABEL_ANALIZANDO_TRAMAS });
 			const tramasAnalizadas = await analizarTramas(valorTramas);
+
 			setTramas(tramasAnalizadas);
 			setEstadoCarga({ cargando: false, progreso: -1, texto: '' });
 		} catch (e) {
@@ -68,7 +169,6 @@ export default function PantallaVisorTramasFedicom2() {
 			setEstadoCarga({ cargando: false, progreso: -1, texto: '' });
 		}
 	}, [analizarTramas, setTramas]);
-
 
 	const cargarFichero = useCallback((event) => {
 
@@ -96,17 +196,34 @@ export default function PantallaVisorTramasFedicom2() {
 		event.target.value = null;
 	}, [setEstadoCarga, analizaTramas, estadoCarga.progreso])
 
+	const cambiarTodaLaSeleccion = useCallback((valor) => {
 
+		let nuevasTramasSeleccionadas = [];
 
-	const onSeleccionCambia = useCallback((indice, seleccionado) => {
-		
-		if (seleccionado === true)
-			pushElementoSeleccionado(indice);
-		else {
-			eliminaElementoSeleccionado(indice);
+		let tramasNuevas = tramas.map((t, i) => {
+			if (valor) nuevasTramasSeleccionadas.push(i);
+			return { ...t, seleccionada: valor };
+		})
+
+		setTramasSeleccionadas(nuevasTramasSeleccionadas);
+		setTramas(tramasNuevas);
+
+	}, [tramas, setTramas, setTramasSeleccionadas])
+
+	const eliminarTramasSeleccionadas = useCallback( () => {
+
+		// Un atajo por si están seleccionadas todas las tramas
+		if (tramas.length === tramasSeleccionadas.length) {
+			setTramasSeleccionadas([]);
+			setTramas([]);
+			return
 		}
 
-	}, [pushElementoSeleccionado, eliminaElementoSeleccionado])
+		let tramasNuevas = tramas.filter((t, i) => !tramasSeleccionadas.includes(i));
+		setTramasSeleccionadas([]);
+		setTramas(tramasNuevas);
+
+	}, [tramas, tramasSeleccionadas, setTramas, setTramasSeleccionadas])
 
 	return (<>
 		<Container maxWidth={false}>
@@ -156,36 +273,22 @@ export default function PantallaVisorTramasFedicom2() {
 
 		<Collapse in={tramas.length !== 0} >
 			<Container maxWidth={false} className={classes.containerFull}>
-				<ListItem dense className={classes.cabeceraTabla} >
-					<ListItemText>
-						<Box display="flex">
-							<Box pr={2} mr={2} style={{ borderRight: '1px solid rgb(0,0,0,0.1)' }}>
-								<FormControlLabel
-									control={<Checkbox indeterminate color="primary" />}
-									label="Seleccionar todos"
-								/>
-
-							</Box>
-							<Box flexGrow={1} >
-								{JSON.stringify(tramasSeleccionadas)}
-								<Button color="secondary" variant="contained" className={classes.botonReiniciar} startIcon={<Delete />} onClick={() => setTramas([])}>
-									Reiniciar
-								</Button>
-							</Box>
-							<Box pl={2} ml={2} style={{ borderLeft: '1px solid rgb(0,0,0,0.1)' }} >
-								<Button color="secondary" variant="contained" className={classes.botonReiniciar} startIcon={<Delete />} onClick={() => setTramas([])}>
-									Reiniciar
-								</Button>
-							</Box>
-						</Box>
-					</ListItemText>
-				</ListItem>
-				<Box mt={4}>
+				<CabeceraTramas
+					seleccion={tramasSeleccionadas}
+					classes={classes}
+					onDescartarTramas={() => setTramas([])}
+					cambiarTodaLaSeleccion={cambiarTodaLaSeleccion}
+					totalTramas={tramas.length}
+					onEliminarTramasSeleccionadas={eliminarTramasSeleccionadas}
+				/>
+				<Box >
 					<Virtuoso
+						ref={virtuoso}
+						className={classes.virtuoso}
 						style={{ height: Math.max(400, windowSize.height - 300) + 'px' }}
 						data={tramas}
-						itemContent={(index, item) => renderizaTrama(index, item, onSeleccionCambia)}
-						overscan={{ main: 20, reverse: 20 }} />
+						itemContent={(index, item) => renderizaTrama(index, item, cambiarSeleccionDeTrama, classes)}
+						overscan={20} />
 				</Box>
 			</Container>
 		</Collapse>

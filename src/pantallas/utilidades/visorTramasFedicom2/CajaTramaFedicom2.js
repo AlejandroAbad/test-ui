@@ -1,7 +1,6 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, IconButton, ListItem, ListItemText, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
-import { DataGrid } from '@material-ui/data-grid';
-import { ExpandMore, FunctionsTwoTone, MoreVert } from "@material-ui/icons";
-import { useCallback, useState } from "react";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Checkbox, Grid, ListItem, ListItemText, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import { ExpandMore } from "@material-ui/icons";
+import { useCallback, useEffect, useState } from "react";
 
 const DESCRIPION_INCIDENCIAS = {
 	"01": "No hay Existencias",
@@ -27,7 +26,7 @@ const DESCRIPION_INCIDENCIAS = {
 	"21": "Entrega total demorada",
 	"22": "Entrega parcial demorada"
 }
-
+/*
 const MOTIVO_ABONO = {
 	"01": "Caducidad del producto",
 	"02": "Retirado por alerta farmaceutica",
@@ -40,7 +39,7 @@ const MOTIVO_ABONO = {
 	"09": "Defecto de calidad",
 	"10": "Otros"
 }
-
+*/
 
 
 function Caja({ titulo, children, ...props }) {
@@ -82,12 +81,17 @@ function getCantidades(linea) {
 }
 
 
-export default function CajaTramaFedicom2({ trama, indice, onSeleccionCambia }) {
+export default function CajaTramaFedicom2({ trama, indice, onSeleccionCambia, classes }) {
 
+	useEffect(() => {
+		setSeleccionada(trama.seleccionada ?? false)
+	}, [trama]);
 
 	let fecha = <>{trama.fecha.substring(6, 8)}/{ trama.fecha.substring(4, 6)}/{ trama.fecha.substring(0, 4)}&nbsp;{ trama.hora.substring(0, 2)}:{ trama.hora.substring(2, 4)}:{ trama.hora.substring(4, 6)} </>
 
 	const [seleccionada, setSeleccionada] = useState(trama.seleccionada || false);
+	const [expandido, setExpandido] = useState(trama.expandido || false);
+
 
 	const invertirSeleccion = useCallback(() => {
 		trama.seleccionada = !trama.seleccionada;
@@ -95,14 +99,19 @@ export default function CajaTramaFedicom2({ trama, indice, onSeleccionCambia }) 
 		onSeleccionCambia(indice, trama.seleccionada);
 	}, [trama, indice, onSeleccionCambia, setSeleccionada]);
 
+	const invertirExpansion = useCallback(() => {
+		trama.expandido = !trama.expandido;
+		setExpandido(trama.expandido);
+	}, [trama, setExpandido]);
 
-	return <ListItem dense key={indice} style={{ borderBottom: '1px solid rgb(0,0,0,0.1)', paddingBottom: '1.5em' }} >
+
+	return <ListItem dense key={indice} className={classes.contenedorTrama} component={Paper} elevation={0} variant="outlined" square >
 		<ListItemText>
 			<Box display="flex">
 				<Box pr={2}>
-					<Checkbox color="primary" 
+					<Checkbox color="primary"
 						checked={seleccionada}
-						onChange={invertirSeleccion} 
+						onChange={invertirSeleccion}
 					/>
 				</Box>
 				<Box flexGrow={1}>
@@ -127,10 +136,10 @@ export default function CajaTramaFedicom2({ trama, indice, onSeleccionCambia }) 
 						</Caja>
 						<Grid item xs={12}>
 
-							<Accordion TransitionProps={{ unmountOnExit: true }}>
-								<AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel1bh-content" id="panel1bh-header"								>
+							<Accordion TransitionProps={{ unmountOnExit: true }} square elevation={1} variant="outlined" expanded={expandido} onChange={invertirExpansion}>
+								<AccordionSummary expandIcon={<ExpandMore />} 							>
 									<Caja titulo="Posiciones" xs={4}>
-										{trama.lineas.length} línea{trama.lineas.length !== 1 && 's'}
+										{trama.lineas?.length || 'Sin'} línea{trama.lineas?.length !== 1 && 's'}
 									</Caja>
 								</AccordionSummary>
 								<AccordionDetails>
@@ -146,7 +155,7 @@ export default function CajaTramaFedicom2({ trama, indice, onSeleccionCambia }) 
 												</TableRow>
 											</TableHead>
 											<TableBody>
-												{trama.lineas.map((row, i) => (
+												{trama.lineas?.length && trama.lineas.map((row, i) => (
 													<TableRow key={i}>
 														<TableCell component="th" scope="row">{row.codArti}</TableCell>
 														<TableCell>{getCantidades(row)}</TableCell>
