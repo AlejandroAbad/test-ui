@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Checkbox, Collapse, Container, Divider, Fade, FormControlLabel, ListItem, ListItemText, makeStyles, TextField, Typography } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Checkbox, Collapse, Container, Divider, Fade, FormControlLabel,  ListItem, ListItemText, makeStyles, TextField,  Typography } from "@material-ui/core";
 import useWindowSize from "hooks/useWindowSize";
 import TituloPantalla from "navegacion/TituloPantalla";
 import { useCallback, useRef, useState } from "react";
@@ -9,6 +9,7 @@ import CircularProgressWithLabel from "common/CircularProgressWithLabel";
 import workerAnalizaTramas from "workers/workerAnalisisTramasFedicom2";
 import CajaTramaFedicom2 from "./CajaTramaFedicom2";
 import useSeleccion from "hooks/useSeleccion";
+import DialogoEnvio from "./DialogoEnvio";
 
 
 const LABEL_CARGANDO_FICHERO = 'Cargando fichero ...';
@@ -68,7 +69,7 @@ const renderizaTrama = (index, trama, onSeleccionCambia, classes) => {
 }
 
 
-const CabeceraTramas = ({ seleccion, totalTramas, classes, cambiarTodaLaSeleccion, onDescartarTramas, onEliminarTramasSeleccionadas  }) => {
+const CabeceraTramas = ({ seleccion, totalTramas, classes, cambiarTodaLaSeleccion, onDescartarTramas, onEliminarTramasSeleccionadas, onEnviarTramasSeleccionadas }) => {
 
 	const cambiarSeleccion = useCallback(() => {
 		console.log(seleccion.length, totalTramas)
@@ -117,8 +118,8 @@ const CabeceraTramas = ({ seleccion, totalTramas, classes, cambiarTodaLaSeleccio
 								</Typography>
 								<ButtonGroup className={classes.grupoBotonMenu} variant="outlined" color="default" aria-label="text primary button group" disableElevation>
 
-									<Button className={classes.botonMenu} startIcon={<Send />} disableElevation>test</Button>
-									<Button className={classes.botonMenu} color="secondary" startIcon={<Send />} disableElevation>produccion</Button>
+									<Button className={classes.botonMenu} startIcon={<Send />} disableElevation onClick={() => onEnviarTramasSeleccionadas('test')}>test</Button>
+									<Button className={classes.botonMenu} color="secondary" startIcon={<Send />} disableElevation onClick={() => onEnviarTramasSeleccionadas('produccion')}>produccion</Button>
 								</ButtonGroup>
 							</Box>
 						</Fade>
@@ -139,6 +140,8 @@ const CabeceraTramas = ({ seleccion, totalTramas, classes, cambiarTodaLaSeleccio
 }
 
 
+
+
 export default function PantallaVisorTramasFedicom2() {
 
 	const classes = useStyles();
@@ -150,6 +153,11 @@ export default function PantallaVisorTramasFedicom2() {
 	const [analizarTramas] = useWorker(workerAnalizaTramas);
 	const [estadoCarga, setEstadoCarga] = useState({ cargando: false, progreso: 0, texto: '' });
 	const [tramas, setTramas] = useState([]);
+
+	const [dialogoReenvioAbierto, setDialogoReenvioAbierto] = useState(false);
+	const [destinoReenvio, setDestinoReenvio] = useState(false);
+
+
 	const [tramasSeleccionadas, {
 		cambiarElemento: cambiarSeleccionDeTrama,
 		setSeleccion: setTramasSeleccionadas
@@ -210,7 +218,7 @@ export default function PantallaVisorTramasFedicom2() {
 
 	}, [tramas, setTramas, setTramasSeleccionadas])
 
-	const eliminarTramasSeleccionadas = useCallback( () => {
+	const eliminarTramasSeleccionadas = useCallback(() => {
 
 		// Un atajo por si están seleccionadas todas las tramas
 		if (tramas.length === tramasSeleccionadas.length) {
@@ -224,6 +232,11 @@ export default function PantallaVisorTramasFedicom2() {
 		setTramas(tramasNuevas);
 
 	}, [tramas, tramasSeleccionadas, setTramas, setTramasSeleccionadas])
+
+	const abrirDialogoReenvio = useCallback( (destino) => {
+		setDestinoReenvio(destino);
+		setDialogoReenvioAbierto(true);
+	}, [setDestinoReenvio, setDialogoReenvioAbierto])
 
 	return (<>
 		<Container maxWidth={false}>
@@ -280,18 +293,30 @@ export default function PantallaVisorTramasFedicom2() {
 					cambiarTodaLaSeleccion={cambiarTodaLaSeleccion}
 					totalTramas={tramas.length}
 					onEliminarTramasSeleccionadas={eliminarTramasSeleccionadas}
+					onEnviarTramasSeleccionadas={abrirDialogoReenvio}
 				/>
 				<Box >
 					<Virtuoso
 						ref={virtuoso}
 						className={classes.virtuoso}
-						style={{ height: Math.max(400, windowSize.height - 300) + 'px' }}
+						style={{ height: Math.max(400, windowSize.height - 260) + 'px' }}
 						data={tramas}
 						itemContent={(index, item) => renderizaTrama(index, item, cambiarSeleccionDeTrama, classes)}
 						overscan={20} />
 				</Box>
 			</Container>
 		</Collapse>
+	
+
+
+		<DialogoEnvio 
+			open={dialogoReenvioAbierto} 
+			onClose={() => setDialogoReenvioAbierto(false)}
+			destino={destinoReenvio}
+			tramas={tramas}
+			tramasSeleccionadas={tramasSeleccionadas}
+		/>
+	
 	</>
 
 
