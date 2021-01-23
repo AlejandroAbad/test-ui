@@ -306,8 +306,6 @@ export default function PantallaVisorTramasFedicom2() {
 				</Box>
 			</Container>
 		</Collapse>
-	
-
 
 		<DialogoEnvio 
 			open={dialogoReenvioAbierto} 
