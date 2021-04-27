@@ -78,7 +78,7 @@ export default function PantallaLogin() {
 	const { setJwt } = useContext(ContextoAplicacion);
 	const refUsuario = useRef();
 	const refPasword = useRef();
-	const { resultado, post: solicitarToken } = useApiCall('https://fedicom3-dev.hefame.es')
+	const { resultado, post } = useApiCall(K.URL_CONCENTRADOR)
 	const [mostarError, setMostrarError] = useState(false);
 
 
@@ -92,7 +92,7 @@ export default function PantallaLogin() {
 		}
 
 		setMostrarError(false);
-		solicitarToken('/authenticate', authBody, (error, datos) => {
+		post('/authenticate', authBody, (error, datos) => {
 			if (error) {
 				setMostrarError(true);
 			}

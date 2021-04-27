@@ -17,7 +17,7 @@ export const useApiCall = (baseUrl, token) => {
 	if (resultado !== ultimoResultado.current) ultimoResultado.current = resultado;
 
 
-	const ejecutarConsulta = useCallback((opciones, callback) => {
+	const ejecutarConsulta = useCallback(async (opciones, callback) => {
 
 		if (!opciones) opciones = {};
 		if (!opciones.body) opciones.body = null;
@@ -42,25 +42,23 @@ export const useApiCall = (baseUrl, token) => {
 		console.log('BODY', body);
 		console.groupEnd();
 
-		setTimeout(() => fedicom3Fetch(url, opcionesHttp, token, body)
-			.then(response => {
-				if (response) {
-					if (response.ok) {
-						setResultado({ ok: true, datos: response.body, error: null, cargando: false, respuesta: response, query: body });
-						if (callback) callback(null, response.body);
-					} else {
-						setResultado({ ok: false, datos: null, error: response.body, cargando: false, respuesta: response, query: body });
-						if (callback) callback(response.body, null);
-					}
 
+		try {
+			let response = await fedicom3Fetch(url, opcionesHttp, token, body);
+			console.log(response);
+			if (response.ok) {
+				setResultado({ ok: true, datos: response.body, error: null, cargando: false, respuesta: response, query: body });
+				if (callback) callback(null, response.body);
+			} else {
+				setResultado({ ok: false, datos: null, error: response.body, cargando: false, respuesta: response, query: body });
+				if (callback) callback(response.body, null);
+			}
+		} catch (error) {
+			console.log(error);
+			setResultado({ ok: false, datos: null, error, cargando: false, respuesta: null, query: body });
+			if (callback) callback(error, null);
+		}
 
-				}
-			})
-			.catch(error => {
-				setResultado({ ok: false, datos: null, error, cargando: false, respuesta: null, query: body });
-				if (callback) callback(error, null);
-			})
-			, 1000)
 	}, [setResultado, baseUrl, token])
 
 
@@ -151,7 +149,7 @@ const fedicom3Fetch = (url, options = {}, token = null, body = null) => {
 	if (!options.headers) options.headers = {};
 
 	if (token) {
-		options.headers['jwt'] = token;
+		options.headers['Authorization'] = 'Bearer ' + token;
 	}
 
 	return jsonFetch(url, options, body);

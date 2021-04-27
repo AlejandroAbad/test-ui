@@ -39,7 +39,9 @@ const useStyles = makeStyles((theme) => ({
 export default function MenuSuperior({ onMenuClicked, ...props }) {
 
 	const classes = useStyles();
-	const { jwt, tiempoRestanteToken, setJwt } = useContext(ContextoAplicacion);
+	const { getJwt, tiempoRestanteToken, setJwt } = useContext(ContextoAplicacion);
+
+	const jwt = getJwt();
 
 
 	const [anchorEl, setAnchorEl] = useState(null);

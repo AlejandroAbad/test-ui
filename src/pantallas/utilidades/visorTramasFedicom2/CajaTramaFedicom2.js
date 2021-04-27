@@ -105,8 +105,8 @@ export default function CajaTramaFedicom2({ trama, indice, onSeleccionCambia, cl
 	}, [trama, setExpandido]);
 
 
-	return <ListItem dense key={indice} className={classes.contenedorTrama} component={Paper} elevation={0} variant="outlined" square >
-		<ListItemText>
+	return <ListItem dense key={indice} className={seleccionada ? classes.contenedorTramaSeleccionada : classes.contenedorTrama} component={Paper} elevation={0} variant="outlined" square >
+		<ListItemText >
 			<Box display="flex">
 				<Box pr={2}>
 					<Checkbox color="primary"
@@ -136,7 +136,15 @@ export default function CajaTramaFedicom2({ trama, indice, onSeleccionCambia, cl
 						</Caja>
 						<Grid item xs={12}>
 
-							<Accordion TransitionProps={{ unmountOnExit: true }} square elevation={1} variant="outlined" expanded={expandido} onChange={invertirExpansion}>
+							<Accordion 
+								TransitionProps={{ unmountOnExit: true }} 
+								square 
+								elevation={1} 
+								variant="outlined" 
+								expanded={expandido} 
+								onChange={invertirExpansion}
+								className={seleccionada ? classes.acordeonTramaSeleccionada : ''}
+							>
 								<AccordionSummary expandIcon={<ExpandMore />} 							>
 									<Caja titulo="Posiciones" xs={4}>
 										{trama.lineas?.length || 'Sin'} línea{trama.lineas?.length !== 1 && 's'}

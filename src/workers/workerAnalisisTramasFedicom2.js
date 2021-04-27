@@ -5,9 +5,6 @@
 
 export default function workerAnalizaTramas(contenidoFichero) {
 
-
-
-
 	function aLogin(data, dataRef) {
 		let idx = 3;
 		dataRef.version = data.substring(idx, idx += 1);

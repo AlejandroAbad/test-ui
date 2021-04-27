@@ -1,6 +1,5 @@
 import { Card, AppBar, Paper, Container, Dialog, IconButton, makeStyles, Slide, Toolbar, Typography, Button, CardContent, CardActions, Divider, Box, LinearProgress, Collapse, List, ListItem, ListItemIcon, ListItemText, Slider, Fade } from "@material-ui/core";
-import { CloseIcon } from "@material-ui/data-grid";
-import { BugReport, Check, FlightTakeoff, HourglassEmpty, Pause, PlayArrow, Stop, Whatshot } from "@material-ui/icons";
+import { Close, BugReport, Check, FlightTakeoff, HourglassEmpty, Pause, PlayArrow, Stop, Whatshot } from "@material-ui/icons";
 import TituloPantalla from "navegacion/TituloPantalla";
 import { forwardRef, useCallback, useState } from "react";
 
@@ -8,6 +7,7 @@ import imgCobete from './cobete.webp';
 import imgCobeteParado from './cobeteParado.png';
 import imgCobeteFinalizada from './misionFinalizada.png';
 import imgCobeteAbortada from './misionAbortada.png';
+import { useApiCall } from "hooks/useApiCall";
 
 const useStyles = makeStyles((theme) => ({
 	appBar: {
@@ -46,9 +46,32 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 
+const convertirTramaAFedicom3 = function(trama2) {
+	return {
+		estado: 'EN COLA',
+		trama3: {
+			authReq: {
+				username: trama2.usuario,
+				domain: trama2.transfer ? 'transfer_laboratorio' : 'FEDICOM'
+			},
+			codigoCliente: trama2.codCli,
+			numeroPedidoOrigen: trama2.crc,
+			codigoAlmacenServicio: trama2.almacen,
+			tipoPedido: trama2.tipoPed,
+			lineas: trama2.lineas.map( linea2 => {
+				return {
+					codigoArticulo: linea2.codArti,
+					cantidad: linea2.cantidad,
+					valeEstupefaciente: linea2.valeEstupefaciente ?? undefined,
+					descuentoPorcentaje: linea2.descuentoLinea ?? undefined
+				}
+			})
+		} 
+
+	}
+}
+
 export default function DialogoEnvio({ open, onClose, destino, tramas, tramasSeleccionadas }) {
-
-
 
 	const [misionActiva, setMisionActiva] = useState(false);
 	const [misionFinalizada, setMisionFinalizada] = useState(false);
@@ -58,16 +81,27 @@ export default function DialogoEnvio({ open, onClose, destino, tramas, tramasSel
 	const [vuelosSimultaneos, setVuelosSimultaneos] = useState(5);
 	const [retrasoEntreVuelos, setRetrasoEntreVuelos] = useState(0.5);
 
+
+	const { post: lanzarPedido } = useApiCall('https://fedicom3-dev.hefame.es')
+
+
+
 	const enviarTramas = useCallback(() => {
 		setMisionActiva(true);
+
+		
+		let tramasPendientes = tramasSeleccionadas.map(indiceDeTrama => convertirTramaAFedicom3(tramas[indiceDeTrama]) );
+
+		console.log(tramasPendientes)
+
+		lanzarPedido('/pedidos', )
 
 		setTimeout(() => {
 			setMisionActiva(false);
 			setMisionFinalizada(true);
 		}, 5000)
 
-	}, [setMisionActiva, setMisionFinalizada])
-
+	}, [setMisionActiva, setMisionFinalizada, tramasSeleccionadas, lanzarPedido, tramas]) 
 
 	const cerrarDialogo = useCallback(() => {
 		setMisionActiva(false);
@@ -76,8 +110,6 @@ export default function DialogoEnvio({ open, onClose, destino, tramas, tramasSel
 		setMisionAbortada(false);
 		onClose();
 	}, [setMisionActiva, setMisionFinalizada, onClose])
-
-
 
 	const classes = useStyles();
 	const laEse = tramasSeleccionadas.length === 1 ? '' : 's';
@@ -88,7 +120,7 @@ export default function DialogoEnvio({ open, onClose, destino, tramas, tramasSel
 				<Toolbar>
 					<Fade in={!misionActiva && !misionFinalizada}>
 						<IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
-							<CloseIcon />
+							<Close />
 						</IconButton>
 					</Fade>
 					<Typography variant="h6" className={classes.title}>
@@ -125,7 +157,7 @@ export default function DialogoEnvio({ open, onClose, destino, tramas, tramasSel
 							<Button size="small" variant="outlined" color="secondary" onClick={enviarTramas}>
 								Sí, estoy TO loco
         				</Button>
-							<Divider vertical />
+							<Divider orientation="vertical" />
 							<Button size="small" variant="outlined" color="primary" onClick={onClose}>
 								NO, NI DE COÑA
         				</Button>

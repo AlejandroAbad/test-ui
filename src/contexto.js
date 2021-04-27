@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useState } from 'react';
+import K from 'K';
 
 import useStateLocalStorage from 'hooks/useStateLocalStorage';
 import useInterval from 'hooks/useInterval';
@@ -13,8 +14,8 @@ const ProveedorContextoAplicacion = ({ children }) => {
 	const [usuario, _setUsuario] = useStateLocalStorage('login.usuario', null, true);
 	const [tiempoRestanteToken, _setTiempoRestanteToken] = useState(Infinity);
 
-	useInterval( async () => {
-		
+	useInterval(async () => {
+
 		if (usuario?.exp > 0 && usuario?.exp < 9999999999999) {
 			let now = (new Date()).getTime() / 1000;
 			let ttl = Math.round(usuario.exp - now);
@@ -38,13 +39,39 @@ const ProveedorContextoAplicacion = ({ children }) => {
 	const setJwt = useCallback((token, datos) => {
 		_setJwt(token);
 		_setUsuario(datos);
-
 	}, [_setJwt, _setUsuario]);
 
+	const getJwt = useCallback( (inclusoSiEstaCadudado = false) => {
+		if (inclusoSiEstaCadudado) return jwt;
+		if (!usuario) return null;
+
+		let now = (new Date()).getTime() / 1000;
+		let ttl = Math.round(usuario.exp - now);
+
+		if (ttl > K.MARGEN_TTL_TOKEN) {
+			return jwt;
+		}
+		return null;
+
+	}, [jwt, usuario])
 
 
+	const getUsuario = useCallback((inclusoSiEstaCadudado = false) => {
+		if (inclusoSiEstaCadudado) return usuario;
+		if (!usuario) return null;
 
-	return <Provider value={{ jwt, usuario, tiempoRestanteToken,  setJwt }}>{children}</Provider>;
+		let now = (new Date()).getTime() / 1000;
+		let ttl = Math.round(usuario.exp - now);
+
+		if (ttl > K.MARGEN_TTL_TOKEN) {
+			return usuario;
+		}
+		return null;
+
+	}, [usuario])
+
+
+	return <Provider value={{ getJwt, getUsuario, tiempoRestanteToken, setJwt }}>{children}</Provider>;
 };
 
 export { ContextoAplicacion, ProveedorContextoAplicacion };

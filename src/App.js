@@ -11,59 +11,61 @@ import Pantalla from 'pantallas/Pantalla';
 import { ContextoAplicacion } from 'contexto';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-  },
-  content: {
-    flexGrow: 1,
-    padding: 0,
-    marginTop: theme.spacing(10),
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    })
-  }
+	root: {
+		display: 'flex',
+	},
+	content: {
+		flexGrow: 1,
+		padding: 0,
+		marginTop: theme.spacing(10),
+		transition: theme.transitions.create('margin', {
+			easing: theme.transitions.easing.sharp,
+			duration: theme.transitions.duration.leavingScreen,
+		})
+	}
 }));
 
 export default function App() {
 
-  const classes = useStyles();
-  const [drawerOpen, _setDrawerOpen] = React.useState(false);
+	const classes = useStyles();
+	const [drawerOpen, _setDrawerOpen] = React.useState(false);
 
-  const { jwt } = useContext(ContextoAplicacion);
-
-
-  const handleDrawerSwitch = useCallback((flag) => {
-    if (flag === undefined)
-      _setDrawerOpen(!drawerOpen);
-    else
-      _setDrawerOpen(flag ? true : false);
-  }, [drawerOpen, _setDrawerOpen]);
+	const { getJwt } = useContext(ContextoAplicacion);
+	const jwt = getJwt();
 
 
-  return (
-    <Router>
-      <div className={classes.root}>
+	const handleDrawerSwitch = useCallback((flag) => {
+		if (flag === undefined)
+			_setDrawerOpen(!drawerOpen);
+		else
+			_setDrawerOpen(flag ? true : false);
+	}, [drawerOpen, _setDrawerOpen]);
 
-        <CssBaseline />
 
-        <MenuSuperior onMenuClicked={handleDrawerSwitch} />
-        <DrawerLateral open={drawerOpen} onClose={() => handleDrawerSwitch(false)} onOpen={() => handleDrawerSwitch(true)} />
+	return (
+		<Router>
+			<div className={classes.root}>
 
-        <main className={classes.content}>
-            {!jwt ? <Pantalla.Login /> :
+				<CssBaseline />
 
-              <Switch>
-                <Route path="/usuario" render={(props) => <Pantalla.Usuario {...props} />} />
-                <Route path="/utilidades/visorTramasFedicom2" render={(props) => <Pantalla.VisorTramasFedicom2 {...props} />} />
-                <Route path="/" render={(props) => <Pantalla.Principal {...props} />} />
-              </Switch>
+				<MenuSuperior onMenuClicked={handleDrawerSwitch} />
+				{jwt && <DrawerLateral open={drawerOpen} onClose={() => handleDrawerSwitch(false)} onOpen={() => handleDrawerSwitch(true)} />}
 
-            }
+				<main className={classes.content}>
+					{!jwt ? <Pantalla.Login /> :
 
-          </main>
+						<Switch>
+							<Route path="/usuario" render={(props) => <Pantalla.Usuario {...props} />} />
+							<Route path="/pedidos/f3" render={(props) => <Pantalla.PedidosF3 {...props} />} />
+							{/*<Route path="/utilidades/visorTramasFedicom2" render={(props) => <Pantalla.VisorTramasFedicom2 {...props} />} /> */}
+							<Route path="/" render={(props) => <Pantalla.Principal {...props} />} />
+						</Switch>
 
-      </div>
-    </Router>
-  );
+					}
+
+				</main>
+
+			</div>
+		</Router>
+	);
 }

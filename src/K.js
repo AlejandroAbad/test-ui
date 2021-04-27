@@ -16,7 +16,10 @@ const K = {
 			perms: []
 		}
 	},
-	ALERTA_EXPIRACION_TOKEN: 5*60
+	ALERTA_EXPIRACION_TOKEN: 5*60,
+	MARGEN_TTL_TOKEN: 60,
+	URL_CONCENTRADOR: 'http://localhost:5000',
+	URL_MONITOR: 'http://localhost:5001/v1'
 
 }
 

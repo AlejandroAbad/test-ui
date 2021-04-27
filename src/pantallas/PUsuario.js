@@ -46,7 +46,9 @@ const useStyles = makeStyles((theme) => ({
 function CartaDatosUsuario() {
 
 	const classes = useStyles();
-	const { usuario } = useContext(ContextoAplicacion);
+	const { getUsuario } = useContext(ContextoAplicacion);
+
+	const usuario = getUsuario();
 
 	if (!usuario) {
 		return (
@@ -117,7 +119,10 @@ function CartaDatosUsuario() {
 function CartaDatosTokenFedicom3() {
 
 	const classes = useStyles();
-	const { jwt, usuario, tiempoRestanteToken } = useContext(ContextoAplicacion);
+	const { getJwt, getUsuario, tiempoRestanteToken } = useContext(ContextoAplicacion);
+
+	const usuario = getUsuario();
+	const jwt = getJwt();
 
 	if (!usuario) {
 		return (

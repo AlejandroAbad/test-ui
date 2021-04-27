@@ -47,6 +47,15 @@ const useStyles = makeStyles((theme) => ({
 		paddingBottom: theme.spacing(6),
 		borderTop: 'none'
 	},
+	contenedorTramaSeleccionada: {
+		paddingTop: theme.spacing(4),
+		paddingBottom: theme.spacing(6),
+		borderTop: 'none',
+		backgroundColor: theme.palette.grey[100]
+	},
+	acordeonTramaSeleccionada: {
+		backgroundColor: theme.palette.grey[100]
+	},
 	grupoBotonMenu: {
 		paddingLeft: theme.spacing(0.8)
 	},
@@ -72,7 +81,6 @@ const renderizaTrama = (index, trama, onSeleccionCambia, classes) => {
 const CabeceraTramas = ({ seleccion, totalTramas, classes, cambiarTodaLaSeleccion, onDescartarTramas, onEliminarTramasSeleccionadas, onEnviarTramasSeleccionadas }) => {
 
 	const cambiarSeleccion = useCallback(() => {
-		console.log(seleccion.length, totalTramas)
 		cambiarTodaLaSeleccion(seleccion.length !== totalTramas);
 	}, [cambiarTodaLaSeleccion, seleccion, totalTramas])
 
@@ -130,7 +138,7 @@ const CabeceraTramas = ({ seleccion, totalTramas, classes, cambiarTodaLaSeleccio
 					<Divider orientation="vertical" flexItem />
 					<Box  >
 						<Button color="default" variant="contained" className={classes.botonReiniciar} startIcon={<RotateLeft />} onClick={onDescartarTramas} disableElevation>
-							Reiniciar tramas
+							Descartar tramas
 						</Button>
 					</Box>
 				</Box>

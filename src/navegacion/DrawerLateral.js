@@ -1,5 +1,5 @@
 import { Avatar, Box, Chip, Collapse, Icon, IconButton, List, ListItem, ListItemIcon, ListItemText, ListSubheader, makeStyles, SwipeableDrawer } from "@material-ui/core";
-import { Assessment, Business, CallSplit, Input, ChevronLeft, Dashboard, ExpandLess, ExpandMore, Filter2, Looks3, MoveToInbox, NearMe, Speed, Storage, Security, Translate, FindInPage } from "@material-ui/icons";
+import { Assessment, Business, CallSplit, Input, ChevronLeft, Dashboard, ExpandLess, ExpandMore, Filter2, Looks3, NearMe, Speed, Storage, Security, FindInPage } from "@material-ui/icons";
 import ContextoAplicacion from "contexto";
 import { useCallback, useContext, useState } from "react";
 import { Link } from "react-router-dom";
@@ -95,7 +95,7 @@ function BotonMenu({ texto, icono, link, onClick, subMenu, esTitulo, cerrarDrawe
 				cerrarDrawer();
 			}
 		}
-		
+
 	}
 
 	return (
@@ -115,17 +115,11 @@ function BotonMenu({ texto, icono, link, onClick, subMenu, esTitulo, cerrarDrawe
 
 const BOTONES = [
 
-
 	{ texto: "Dashboard", icono: Dashboard, link: '/' },
 
-
 	{ texto: "Pedidos", esTitulo: true },
-	{
-		texto: "Transmisiones", icono: MoveToInbox, subMenu: [
-			{ texto: "Proyman / Fedicom 2", icono: Filter2, link: '/' },
-			{ texto: "Fedicom 3", icono: Looks3, link: '/' },
-		]
-	},
+	{ texto: "Fedicom 3", icono: Looks3, link: '/pedidos/f3' },
+	{ texto: "Proyman / Fedicom 2", icono: Filter2, link: '/' },
 	{
 		texto: "Informes", icono: Assessment, subMenu: [
 			{ texto: "Pedidos por almacén", icono: Business, link: '/' },
@@ -134,7 +128,7 @@ const BOTONES = [
 	},
 
 
-	{ texto: "Fedicom3", esTitulo: true },
+	{ texto: "Monitorización", esTitulo: true },
 	{ texto: "Base de datos", icono: Storage, link: '/' },
 	{ texto: "Procesos", icono: Speed, link: '/' },
 	{
@@ -146,7 +140,6 @@ const BOTONES = [
 
 
 	{ texto: "Herramientas", esTitulo: true },
-
 	{
 		texto: "Simuladores Fedicom3", icono: NearMe, subMenu: [
 			{ texto: "Pedidos", icono: NearMe, link: '/' },
@@ -156,7 +149,7 @@ const BOTONES = [
 			{ texto: "Test de stress", icono: Security, link: '/' },
 		]
 	},
-	{ texto: "Visor de tramas Fedicom2", icono: Translate, link: '/utilidades/visorTramasFedicom2' },
+	// { texto: "Visor de tramas Fedicom2", icono: Translate, link: '/utilidades/visorTramasFedicom2' },
 
 
 ]
@@ -164,18 +157,19 @@ const BOTONES = [
 
 export default function DrawerLateral({ open, onClose, onOpen }) {
 
-	const { usuario } = useContext(ContextoAplicacion);
+	const { getUsuario } = useContext(ContextoAplicacion);
 	const classes = useStyles();
+	const usuario = getUsuario();
 
 	if (!usuario) return null;
 
-	return <SwipeableDrawer 
-		className={classes.drawer} 
-		anchor="left" 
-		open={open} 
-		onClose={onClose} 
-		onOpen={onOpen} 
-		classes={{ paper: classes.drawerPaper, }} 
+	return <SwipeableDrawer
+		className={classes.drawer}
+		anchor="left"
+		open={open}
+		onClose={onClose}
+		onOpen={onOpen}
+		classes={{ paper: classes.drawerPaper, }}
 
 	>
 		<div className={classes.drawerHeader}>
@@ -199,7 +193,7 @@ export default function DrawerLateral({ open, onClose, onOpen }) {
 
 		<List >
 			{
-				BOTONES.map((boton, i) => <BotonMenu key={i} cerrarDrawer={onClose} {...boton}  />)
+				BOTONES.map((boton, i) => <BotonMenu key={i} cerrarDrawer={onClose} {...boton} />)
 			}
 		</List>
 
