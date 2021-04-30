@@ -1,26 +1,57 @@
-import { useCallback } from "react";
-import { Chip, makeStyles, TextField } from "@material-ui/core"
+import { useCallback, useState } from "react";
+import { Chip, TextField, withStyles } from "@material-ui/core"
 import { Autocomplete } from "@material-ui/lab";
+import { red } from "@material-ui/core/colors";
 
 
-const useStyles = makeStyles((theme) => ({
-	contenedor: {
-		margin: theme.spacing(0, 0),
-		padding: theme.spacing(0, 0)
+
+
+
+const ColorChip = withStyles((theme) => ({
+	/*
+	colorPrimary: {
+		color: green[500],
+		borderColor: green[500],
+	},
+	deleteIconOutlinedColorPrimary: {
+		color: green[500],
+	},*/
+	colorSecondary: {
+		color: red[500],
+		borderColor: red[500],
+	},
+	deleteIconOutlinedColorSecondary: {
+		color: red[400],
+		'&:hover': {
+			color: red[700],
+		}
 	}
-}));
+
+}))(Chip);
 
 
 
-export const ControlTextoChip = ({ valor, onChange, regexValidacion, regexParticionado, caracteresDeEscape, label, placeholder, opciones=[], ...props }) => {
+export const ControlTextoChip = ({
+	valor,
+	onChange,
+	regexValidacion,
+	regexParticionado,
+	caracteresDeEscape,
+	label,
+	placeholder,
+	helperText,
+	opciones = [],
+	opcionesFijas = false,
+	...props }) => {
 
-	const classes = useStyles();
 	if (!caracteresDeEscape) caracteresDeEscape = [' ', 'Enter', 'Tab']
-	if (!regexParticionado) regexParticionado = /[\s\r\n\t,-.]+/
+	if (!regexParticionado) regexParticionado = /[\s\r\n\t]+/
+
+	let [open, setOpen] = useState(false);
 
 	const handleKeyDown = useCallback(event => {
 
-		if (caracteresDeEscape.includes(event.key)) {
+		if (!opcionesFijas && caracteresDeEscape.includes(event.key)) {
 			event.preventDefault();
 			event.stopPropagation();
 			let valorInput = event.target?.value?.trim() || '';
@@ -29,27 +60,33 @@ export const ControlTextoChip = ({ valor, onChange, regexValidacion, regexPartic
 				onChange([...valor, ...valoresNuevos]);
 			}
 		}
-	}, [valor, onChange, regexParticionado, caracteresDeEscape]);
+	}, [valor, onChange, regexParticionado, caracteresDeEscape, opcionesFijas]);
 
 	const handleBlur = useCallback(event => {
 
-		let valorInput = event.target?.value?.trim() || '';
-		if (valorInput.length > 0) {
-			let valoresNuevos = valorInput.split(regexParticionado).map(valor => valor);
-			onChange([...valor, ...valoresNuevos]);
+		if (!opcionesFijas) {
+			let valorInput = event.target?.value?.trim() || '';
+			if (valorInput.length > 0) {
+				let valoresNuevos = valorInput.split(regexParticionado).map(valor => valor);
+				onChange([...valor, ...valoresNuevos]);
+			}
 		}
+		setOpen(false)
 
-	}, [valor, onChange, regexParticionado]);
+	}, [valor, onChange, regexParticionado, setOpen, opcionesFijas]);
 
 
 
 
 	return <Autocomplete
-		
+		open={open}
+		onOpen={() => setOpen(true)}
+		onClose={() => setOpen(false)}
+		disableCloseOnSelect
 		filterSelectedOptions
 		multiple
-		freeSolo
-		defaultValue={[]}
+		freeSolo={!opcionesFijas}
+		defaultValue={null}
 		value={valor}
 		options={opciones}
 		onChange={(event, newValue) => {
@@ -57,11 +94,20 @@ export const ControlTextoChip = ({ valor, onChange, regexValidacion, regexPartic
 		}}
 		renderTags={(value, getTagProps) => {
 			return value.map((option, index) => {
+
+				if (opcionesFijas) {
+					return <Chip
+						color='primary'
+						label={option}
+						variant="outlined"
+						{...getTagProps({ index })}
+					/>
+				}
+
 				let ok = regexValidacion ? regexValidacion.test(option) : true;
-				return <Chip
+				return <ColorChip
 					color={ok ? 'primary' : 'secondary'}
 					label={option}
-					size="small"
 					variant="outlined"
 					{...getTagProps({ index })}
 				/>
@@ -77,6 +123,7 @@ export const ControlTextoChip = ({ valor, onChange, regexValidacion, regexPartic
 					label={label}
 					placeholder={placeholder}
 					fullWidth
+					helperText={helperText}
 				/>
 			);
 		}}

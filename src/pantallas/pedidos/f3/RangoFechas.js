@@ -121,15 +121,14 @@ export const RangoFechas = () => {
 
 	return <Box component={Paper} elevation={3} className={classes.boxSelector} >
 
-		<h3>Filtrar entre fechas {dateRange.label && <Chip
-			icon={<ArrowRight />}
-			label={dateRange.label}
-			size="small"
+		<h3>Filtrar entre fechas {dateRange.label && <Button
+			startIcon={<DateRange />}
+			
 			color="primary"
-			variant="outlined"
+			variant="contained"
 			className={classes.chipFechaConcreta}
 			onClick={toggle}
-		/>}</h3>
+		>{dateRange.label}</Button>}</h3>
 		{botonSeleccion}
 
 		<Dialog
@@ -150,7 +149,7 @@ export const RangoFechas = () => {
 				/>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={() => setOpen(false)} color="primary" autoFocus>				OK          </Button>
+				<Button onClick={() => setOpen(false)} color="primary" autoFocus>OK</Button>
 			</DialogActions>
 		</Dialog>
 

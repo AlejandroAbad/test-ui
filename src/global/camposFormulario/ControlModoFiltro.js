@@ -1,4 +1,4 @@
-import { Button, makeStyles, withStyles } from "@material-ui/core";
+import { Button, makeStyles } from "@material-ui/core";
 import { useCallback } from "react";
 import { blueGrey, green, red, yellow } from "@material-ui/core/colors/"
 
@@ -11,6 +11,11 @@ const useStyles = makeStyles((theme) => ({
 	},
 	secondary: {
 		color: theme.palette.secondary.main
+	},
+	disabled: {
+		color: theme.palette.grey[500],
+		border: theme.spacing(1),
+		borderColor: theme.palette.grey[500],
 	},
 	info: {
 		color: blueGrey[500]
